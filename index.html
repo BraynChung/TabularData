@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Table Processing Example</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <h1>Table Output & Processing</h1>
+
+    <h2>Table 1:</h2>
+    <table id="table1">
+      <tr>
+        <th>Index #</th>
+        <th>Value</th>
+      </tr>
+    </table>
+
+    <h2>Table 2:</h2>
+    <table id="table2">
+      <tr>
+        <th>Category</th>
+        <th>Value</th>
+      </tr>
+      <tr>
+        <td>Alpha</td>
+        <td id="alpha-value"></td>
+      </tr>
+      <tr>
+        <td>Beta</td>
+        <td id="beta-value"></td>
+      </tr>
+      <tr>
+        <td>Charlie</td>
+        <td id="charlie-value"></td>
+      </tr>
+    </table>
+
+    <script>
+      function parseCSV(csv) {
+        return csv.split("\n").map((row) => row.split(","));
+      }
+
+      function populateTable1(data) {
+        const table = document.getElementById("table1");
+        data.forEach((row, index) => {
+          if (index === 0) return; // Skip header row
+          const tr = table.insertRow();
+          row.forEach((cell) => {
+            const td = tr.insertCell();
+            td.textContent = cell.trim();
+          });
+        });
+      }
+
+      function getValue(index) {
+        const row = document.querySelector(
+          `#table1 tr:nth-child(${parseInt(index.slice(1)) + 1})`
+        );
+        return parseFloat(row.cells[1].textContent);
+      }
+
+      function calculateValues() {
+        // Alpha: A5 + A20
+        const alpha = getValue("A5") + getValue("A20");
+        document.getElementById("alpha-value").textContent = Math.round(alpha);
+
+        // Beta: A15 / A7
+        const beta = getValue("A15") / getValue("A7");
+        document.getElementById("beta-value").textContent = beta.toFixed(2);
+
+        // Charlie: A13 * A12
+        const charlie = getValue("A13") * getValue("A12");
+        document.getElementById("charlie-value").textContent =
+          Math.round(charlie);
+      }
+
+      // Read local CSV file
+      fetch("/Table_Input.csv")
+        .then((response) => response.text())
+        .then((csvData) => {
+          const data = parseCSV(csvData);
+          populateTable1(data);
+          calculateValues();
+        })
+        .catch((error) => {
+          console.error("Error:", error);
+          alert(
+            "Error loading CSV file. Make sure Table_Input.csv is in the same directory as this HTML file."
+          );
+        });
+    </script>
+  </body>
+</html>
